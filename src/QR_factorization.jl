@@ -12,7 +12,7 @@ function householder(x)
     
     s = norm(x)
    
-    # for numerical stability (?)
+    # for numerical stability
     if x[1] >= 0
         s = - s; 
     end
@@ -29,7 +29,7 @@ end
 
 function qr_fact(A)
     
-    m, n = size(A) # matrix dimension m x n
+    m, n = size(A)
     R = A
     Q = Matrix{Float64}(I[1:m, 1:m])
     
@@ -49,16 +49,17 @@ end
 
 
 
-
-A = rand(3,4)
+"""
+A = rand(3,3)
 print_matrix(A)
 print("-----\n")
 #B = copy(A)
 
 Q, R = qr_fact(A)
 
-print_matrix(Q)
+#print_matrix(Q)
 print("-----\n")
-print_matrix(R)
+#print_matrix(R)
 print("-----\n")
 print_matrix(Q*R)
+"""
