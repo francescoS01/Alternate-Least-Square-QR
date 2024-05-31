@@ -50,7 +50,7 @@ k = 2
 Ak_SVD, trash = low_rank(A, k)
 
 # chiamata di QR alternato
-e = 0.0001 
+e = 0.0001
 V_initial = rand(2, 5)
 U, V = LS_QR_alternate(A, k, e, V_initial) 
 Ak_QR =  U*V'

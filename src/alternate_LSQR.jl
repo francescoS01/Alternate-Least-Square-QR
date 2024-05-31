@@ -24,8 +24,11 @@ function LS_QR_alternate(A, k, e, V_test)
 	U_iterative = rand(m, k)
 	err = norm(A - U_iterative * V_iterative')
 	dif_err = Inf
+	dif_UV = Inf
 	
-	while dif_err > e
+	while dif_UV > e #dif_err > e
+
+		UV_old = U_iterative * V_iterative'
 		
 		# CASO 1. fiso V e cerco U, m sotto problemi (col di U' e A')
 		for i in 1:m
@@ -43,8 +46,13 @@ function LS_QR_alternate(A, k, e, V_test)
 		print("ERRORE ", j, " : ", norm(A - U_iterative * V_iterative'))
 		print("\n-------\n")
 		"""
+		# Differenza tra UV_old e UV_new (norma frobenius) tra due iterazioni
+		dif_UV = norm(UV_old - U_iterative * V_iterative', 2)
+		print("\n-------\n")
+		print(dif_UV)
+		print("\n-------\n")
 		
-		# variazione errore rispetto a iterazione precedente (norma frobenius)
+		# variazione errore rispetto a iterazione precedente (norma frobenius) rispetto ad A
 		dif_err = err - sqrt(sum(abs2, (A - U_iterative * V_iterative')))
 		# nuovo errore --> Loss = differenza tra A e U*V' attuale
 		err = sqrt(sum(abs2, (A - U_iterative * V_iterative')))
