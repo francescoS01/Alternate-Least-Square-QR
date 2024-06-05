@@ -15,11 +15,30 @@ m = 50
 n = 50
 
 k = 10 # fixed
-e = 0.1 # fixed
+e = 0.01 # fixed
 
-println("Number of cores used: ", Threads.nthreads())
+nt = Threads.nthreads()
+println("Number of threads used: ", nt)
 
 A = rand(m, n)
 V_initial = rand(k, n)
-print("LSQR_seq test time: ", total_time(A, k, e, V_initial, parallel=false), "\n")
-print("LSQR_par test time: ", total_time(A, k, e, V_initial, parallel=true), "\n")
+
+# Ak_SVD, trash = low_rank(A, k)
+
+# U, V = LS_QR_alternate(copy(A), k, e, copy(V_initial))
+# Ak_QR =  U*V'
+# gap = norm(Ak_SVD - Ak_QR, 2)
+# println("\nGap between the SVD and the QR solution: ", gap)
+
+# U, V = LS_QR_alternate_parallellized_new(copy(A), k, e, copy(V_initial), nt) 
+# Ak_QR =  U*V'
+# gap = norm(Ak_SVD - Ak_QR, 2)
+# println("\nGap between the SVD and the QR solution: ", gap)
+
+print("LSQR_seq test time: ", total_time(copy(A), k, e, copy(V_initial), parallel=false), "\n")
+print("LSQR_par_new test time: ", total_time(copy(A), k, e, copy(V_initial), parallel=true), "\n")
+#LS_QR_alternate_parallellized_new(A, k, e, copy(V_initial), nt)
+
+
+
+

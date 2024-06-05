@@ -35,20 +35,21 @@ function total_time(A, k, e=nothing, V_initial=nothing; parallel=true)
         t = @elapsed begin
             Ak_SVD, trash = low_rank(A, k)
         end
-        print("SVD entered\n")
+        #print("SVD entered\n")
     else
         if (parallel===true)
+            nt=Threads.nthreads()
             t = @elapsed begin
-                U, V = LS_QR_alternate_parallellized(A, k, e, V_initial) 
+                U, V = LS_QR_alternate_parallellized_new(A, k, e, V_initial, nt) 
                 Ak_QR =  U*V'
             end
-            print("LSQR_parallel entered\n")
+            #print("LSQR_parallel_new entered\n")
         else
             t = @elapsed begin
                 U, V = LS_QR_alternate(A, k, e, V_initial) 
                 Ak_QR =  U*V'
             end
-            print("LSQR_seq entered\n")
+            #print("LSQR_seq entered\n")
         end
     end
 
