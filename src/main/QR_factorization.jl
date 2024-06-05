@@ -1,7 +1,8 @@
 using LinearAlgebra
 using Random
 using Printf
-include("../utils/print_matrix.jl")
+include("utils/print_matrix.jl")
+
 
 
 function householder(x)
@@ -11,7 +12,7 @@ function householder(x)
     """
     
     s = norm(x)
-   
+
     # for numerical stability
     if x[1] >= 0
         s = - s; 
@@ -23,12 +24,13 @@ function householder(x)
     u = v / norm(v)
     
     return u
-    
 end
+    
+
 
 
 function qr_fact(A)
-    
+
     m, n = size(A)
     R = A
     Q = Matrix{Float64}(I[1:m, 1:m])
@@ -44,6 +46,7 @@ function qr_fact(A)
     end
     return Q, R
 end
+
 
 
 

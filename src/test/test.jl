@@ -1,6 +1,6 @@
-include("alternate_LSQR.jl")
-include("../utils/print_matrix.jl")
-include("low_rank_SVD.jl")
+include("../main/alternate_LSQR.jl")
+include("../main/utils/print_matrix.jl")
+include("../main/low_rank_SVD.jl")
 using LinearAlgebra
 using Random
 using Printf
@@ -45,15 +45,22 @@ k = 2
 
 
 # ------- STAMPE_TEST -------
+# Begin timing and print at the end
+print("Time for SVD: ")
+@time begin
+    # chiamata con SVD ( perfect approximation )
+    Ak_SVD, trash = low_rank(A, k)
+end
 
-# chiamata con SVD ( perfect approximation )
-Ak_SVD, trash = low_rank(A, k)
 
 # chiamata di QR alternato
 e = 0.0001
 V_initial = rand(2, 5)
-U, V = LS_QR_alternate(A, k, e, V_initial) 
-Ak_QR =  U*V'
+print("Time for LS_QR_alternate: ")
+@time begin
+    U, V = LS_QR_alternate(A, k, e, V_initial) 
+    Ak_QR =  U*V'
+end
 
 # Calculate the rank of the matrix A
 r = rank(A)

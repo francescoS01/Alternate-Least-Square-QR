@@ -1,10 +1,9 @@
 include("QR_factorization.jl")
-include("../utils/print_matrix.jl")
+include("utils/print_matrix.jl")
 using LinearAlgebra
 using Random
 using Printf
-
-
+ 
 
 """
 problem: arg min (x) || Ax - y ||
@@ -15,6 +14,7 @@ y dim = m x 1
 
 
 """
+
 
 
 function LS_QR(A, y)
@@ -34,7 +34,8 @@ function LS_QR(A, y)
     # Risolviamo il sistema lineare Rx = Q^T y per trovare il vettore x
     x = inv(R0) * (Q0'*y)
     return x
-end	
+end
+
 
 
 

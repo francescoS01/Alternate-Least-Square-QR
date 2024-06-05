@@ -1,6 +1,6 @@
-include("../utils/QR_factorization.jl")
-include("../utils/print_matrix.jl")
-include("../utils/LS_QR.jl")
+include("QR_factorization.jl")
+include("utils/print_matrix.jl")
+include("LS_QR.jl")
 using LinearAlgebra
 using Random
 using Printf
