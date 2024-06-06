@@ -1,9 +1,11 @@
-include("QR_factorization.jl")
-include("utils/print_matrix.jl")
-include("LS_QR.jl")
+using Distributed
+@everywhere include("QR_factorization.jl")
+@everywhere include("utils/print_matrix.jl")
+@everywhere include("LS_QR.jl")
 using LinearAlgebra
 using Random
 using Printf
+
 # import Pkg
 # Pkg.update("Random")
 
@@ -47,29 +49,6 @@ function LS_QR_alternate(A, k, e, V_test)
 			a_col = copy(A[:, s])
 			V_iterative'[:, s] = LS_QR(copy(U_iterative), copy(a_col))
 		end
-
-
-
-
-		# ----- PARALLELIZZAZIONE -----
-		# # CASO 1. fiso V e cerco U, m sotto problemi (col di U' e A')
-		# Threads.@threads for i in 1:m
-		# 	a_col = copy(A'[:, i])
-		# 	U_iterative'[:, i] = LS_QR(copy(V_iterative), copy(a_col))
-		# end
-		
-		# # CASO 2. fiso U e cerco V, n sotto problemi 
-		# Threads.@threads for s in 1:n
-		# 	a_col = copy(A[:, s])
-		# 	V_iterative'[:, s] = LS_QR(copy(U_iterative), copy(a_col))
-		# end
-		# ------------------------------
-		
-
-
-
-
-
 		
 		# print("ERRORE ", j, " : ", norm(A - U_iterative * V_iterative'))
 		# print("\n-------\n")
@@ -131,15 +110,7 @@ function LS_QR_alternate_parallellized(A, k, e, V_test)
 	
 end
 
-function U_sub(A_sub_tr, V, k)
-	m_sub, n_sub = size(A_sub_tr)
-	U_iterative = rand(n_sub, k)
-	for i in 1:n_sub
-		a_col = copy(A_sub_tr[:, i])
-		U_iterative'[:, i] = LS_QR(copy(V), copy(a_col))
-	end
-	return U_iterative'[:, 1:n_sub]
-end
+
 
 function LS_QR_alternate_parallellized_new(A, k, e, V_test, nt)
 
@@ -152,6 +123,7 @@ function LS_QR_alternate_parallellized_new(A, k, e, V_test, nt)
 	dif_UV = Inf
 	
 	m_sub = ceil(Int, m/nt)
+	n_sub = ceil(Int, n/nt)
 
 	while dif_UV > e
 
@@ -165,10 +137,16 @@ function LS_QR_alternate_parallellized_new(A, k, e, V_test, nt)
 			end
 		end
 
-		for s in 1:n
-			a_col = copy(A[:, s])
-			V_iterative'[:, s] = LS_QR(copy(U_iterative), copy(a_col))
+		Threads.@threads for i in 0:nt-1
+			if i == nt-1
+				V_iterative'[:, Int(i*n_sub+1):n] = V_sub(copy(A[:, Int(i*n_sub+1):n]), U_iterative, k)
+			else
+				V_iterative'[:, Int(i*n_sub+1):Int(i*n_sub+n_sub)] = V_sub(copy(A[:, Int(i*n_sub+1):Int(i*n_sub+n_sub)]), U_iterative, k)
+			end	
 		end
+
+		#a_col = copy(A[:, s])
+		#V_iterative'[:, s] = LS_QR(copy(U_iterative), copy(a_col))
 
 		dif_UV = norm(UV_old - U_iterative * V_iterative', 2)
 		#dif_err = err - sqrt(sum(abs2, (A - U_iterative * V_iterative')))
@@ -177,5 +155,63 @@ function LS_QR_alternate_parallellized_new(A, k, e, V_test, nt)
 
 	return U_iterative,	V_iterative
 	
+end
+
+
+function V_sub(A_sub, U, k)
+	m_sub, n_sub = size(A_sub)
+	V_iterative = rand(n_sub, k)
+	for i in 1:n_sub
+		a_col = copy(A_sub[:, i])
+		V_iterative'[:, i] = LS_QR(copy(U), copy(a_col))
+	end
+	return V_iterative'[:, 1:n_sub]
+end
+
+
+
+
+# U_sub function remains unchanged (no need for parallelization)
+@everywhere function U_sub(A_sub_tr, V, k)
+	m_sub, n_sub = size(A_sub_tr)
+	U_iterative = rand(n_sub, k)
+	for i in 1:n_sub
+		a_col = copy(A_sub_tr[:, i])
+		U_iterative'[:, i] = LS_QR(copy(V), copy(a_col))
+	end
+	return U_iterative'[:, 1:n_sub]
+end
+
+function LS_QR_alternate_parallellized_new2(A, k, e, V_test, nt)
+	
+	addprocs(4)
+
+	m, n = size(A)	
+	V_iterative = V_test'
+	U_iterative = rand(m, k)
+	err = norm(A - U_iterative * V_iterative')
+	dif_err = Inf
+	dif_UV = Inf	
+	m_sub = ceil(Int, m/nt)	
+	while dif_UV > e	
+		UV_old = U_iterative * V_iterative'	
+		# Distributed update of U
+        U_iterative = @distributed (vcat) for i in 0:nt-1
+            if i == nt-1
+                U_sub(copy(A'[:, Int(i*m_sub+1):m]), copy(V_iterative), k)
+            else
+            	U_sub(copy(A'[:, Int(i*m_sub+1):Int(i*m_sub+m_sub)]), copy(V_iterative), k)
+          	end
+        end	
+
+	    # Sequential update of V (can be parallelized if needed)
+		for s in 1:n
+	    	a_col = copy(A[:, s])
+	    	V_iterative'[:, s] = LS_QR(copy(U_iterative), copy(a_col))
+	  	end	
+	  	dif_UV = norm(UV_old - U_iterative * V_iterative', 2)	
+	end	
+	return U_iterative, V_iterative
+
 end
 
