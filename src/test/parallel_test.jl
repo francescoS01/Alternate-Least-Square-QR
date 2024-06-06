@@ -25,17 +25,17 @@ V_initial = rand(k, n)
 
 Ak_SVD, trash = low_rank(A, k)
 
-# U, V = LS_QR_alternate(copy(A), k, e, copy(V_initial))
-# Ak_QR =  U*V'
-# gap = norm(Ak_SVD - Ak_QR, 2)
-# println("\nGap between the SVD and the QR solution: ", gap)
+U, V = LS_QR_alternate(copy(A), k, e, copy(V_initial))
+Ak_QR =  U*V'
+gap = norm(Ak_SVD - Ak_QR, 2)
+println("\nGap between the SVD and the QR solution: ", gap)
 
 U, V = LS_QR_alternate_parallellized_new(copy(A), k, e, copy(V_initial), nt) 
 Ak_QR =  U*V'
 gap = norm(Ak_SVD - Ak_QR, 2)
 
 
-println("\nGap between the SVD and the QR solution: ", gap)
+println("\nGap between the SVD and the parallel QR solution: ", gap)
 
 println("\n------------------------------------\n")
 print("LSQR_seq test time: ", total_time(copy(A), k, e, copy(V_initial), parallel=false), "\n")
