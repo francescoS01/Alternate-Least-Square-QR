@@ -1,6 +1,8 @@
 include("../main/alternate_LSQR.jl")
 include("../main/utils/print_matrix.jl")
 include("../main/low_rank_SVD.jl")
+include("../main/utils/time_gap.jl")
+
 using LinearAlgebra
 using Random
 using Printf
@@ -27,7 +29,7 @@ A = [61 22 14 67 23;
 
 
 #k = rango della matrice che approssima 
-k = 2
+k = 5
 
 
 
@@ -42,45 +44,50 @@ k = 2
 # print(A)
 # k = 2
 
+nt = Threads.nthreads()
+println("Number of threads used: ", nt)
 
 
 # ------- STAMPE_TEST -------
 # Begin timing and print at the end
-print("Time for SVD: ")
-@time begin
-    # chiamata con SVD ( perfect approximation )
-    Ak_SVD, trash = low_rank(A, k)
-end
+# SVD: 1.22
+# QR:  2.470316 seconds
+# SVD: 2.542586 seconds
 
+# t = @elapsed begin
+#     Ak_SVD, trash = low_rank(A, k)
+# end
+
+# println("SVD test time and gap: ", t , "\n")
 
 # chiamata di QR alternato
-e = 0.0001
-V_initial = rand(2, 5)
-print("Time for LS_QR_alternate: ")
-@time begin
-    U, V = LS_QR_alternate(A, k, e, V_initial) 
-    Ak_QR =  U*V'
-end
+# e = 0.0001
+# V_initial = rand(5, 5)
+# print("Time for LS_QR_alternate: ")
+# @time begin
+#     U, V = LS_QR_alternate(A, k, e, V_initial) 
+#     Ak_QR =  U*V'
+# end
 
 # Calculate the rank of the matrix A
-r = rank(A)
-println("\nRank of the matrix A: ", r)
+# r = rank(A)
+# println("\nRank of the matrix A: ", r)
 # confronto le due soluzioni 
-print("\n-------  Matrice A -------\n")
-print_matrix(A)
-print("\n-------  Matrice U*V' con QR  -------\n")
-print_matrix(Ak_QR)
+# print("\n-------  Matrice A -------\n")
+# print_matrix(A)
+# print("\n-------  Matrice U*V' con QR  -------\n")
+# print_matrix(Ak_QR)
 
-print("\n-------    Matrice U*V' SVD   -------\n")
-print_matrix(Ak_SVD)
+# print("\n-------    Matrice U*V' SVD   -------\n")
+# print_matrix(Ak_SVD)
 
 #print("\n-------        Errore         -------\n")
 #print( sqrt( sum( abs2, (Ak_QR - Ak_SVD) ) ) )
 
 # Calculate the gap between the svd and the qr solution using the Frobenius norm
-gap = norm(Ak_SVD - Ak_QR, 2)
-println("\nGap between the SVD and the QR solution: ", gap)
+# gap = norm(Ak_SVD - Ak_QR, 2)
+# println("\nGap between the SVD and the QR solution: ", gap)
 
 # Calculate the gap between the svd and the qr solution using the Frobenius norm
-gap = norm(Ak_SVD - Ak_QR, 2) / norm(Ak_SVD, 2)
-println("\nNormalized gap between the SVD and the QR solution: ", gap)
+# gap = norm(Ak_SVD - Ak_QR, 2) / norm(Ak_SVD, 2)
+# println("\nNormalized gap between the SVD and the QR solution: ", gap)

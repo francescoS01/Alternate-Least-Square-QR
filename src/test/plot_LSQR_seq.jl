@@ -5,7 +5,7 @@ using Base
 using Plots
 include("../main/alternate_LSQR.jl")
 include("../main/utils/print_matrix.jl")
-include("../main/utils/timing.jl")
+include("../main/utils/time_gap.jl")
 include("../main/low_rank_SVD.jl")
 
 
@@ -15,9 +15,9 @@ n = 50
 k = 10 # fixed
 e = 0.1 # fixed
 
-#print("SVD test time: ", total_time(rand(m, n), k), "\n")
-#print("LSQR_seq test time: ", total_time(rand(m, n), k, e, rand(k, n), parallel=false), "\n")
-#print("LSQR_par test time: ", total_time(rand(m, n), k, e, rand(k, n), parallel=true), "\n")
+#print("SVD test time: ", time_gap(rand(m, n), k), "\n")
+#print("LSQR_seq test time: ", time_gap(rand(m, n), k, e, rand(k, n), parallel=false), "\n")
+#print("LSQR_par test time: ", time_gap(rand(m, n), k, e, rand(k, n), parallel=true), "\n")
 
 
 LSQR_seq = []
@@ -25,8 +25,8 @@ LSQR_par = []
 for _ in 1:4
     A = rand(m, n)
     V_initial = rand(k, n)
-    push!(LSQR_seq, Dict(:dim => (m, n), :time => total_time(A, k, e, V_initial, parallel=false)))
-    #push!(LSQR_par, Dict(:dim => (m, n), :time => total_time(A, k, e, V_initial, parallel=true)))
+    t,_= time_gap(A, k, e, V_initial, parallel=false)
+    push!(LSQR_seq, Dict(:dim => (m, n), :time => t))
     global m += 5
     global n += 5
 end

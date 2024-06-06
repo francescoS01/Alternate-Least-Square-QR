@@ -10,11 +10,11 @@ using Printf
 # Pkg.update("Random")
 
 
-function LS_QR_alternate(A, k, e, V_initial)
+function LS_QR_alternate(A, k, e, V_iterative)
 	
 	m, n = size(A) 
 
-	V_iterative = V_initial'
+	#V_iterative = V_initial'
 	U_iterative = rand(m, k)
 	err = norm(A - U_iterative * V_iterative')
 	dif_err = Inf
@@ -61,11 +61,11 @@ end
 
 
 # parallelized version of LS_QR_alternate
-function LS_QR_alternate_parallellized_new(A, k, e, V_initial, nt)
-
+function LS_QR_alternate_parallellized(A, k, e, V_iterative, nt)
+	
 	m, n = size(A)
 
-	V_iterative = V_initial'
+	#V_iterative = V_initial' # sistemare questione delle dimensioni 
 	U_iterative = rand(m, k)
 	err = norm(A - U_iterative * V_iterative')
 	dif_err = Inf
