@@ -46,10 +46,16 @@ function time_gap(A, k, e=nothing, V_initial=nothing; parallel=nothing)
     missing_param = (isnothing(e)) + (isnothing(V_initial)) + (isnothing(parallel))
     #println("Number of missing parameters: ", missing_param)
     
+    Ak_SVD=[]
+    Ak_QR=[]
+    gapSVD = 0
+    gapA = 0
+
     if (missing_param == 3)
         t = @elapsed begin
             Ak_SVD, trash = low_rank_SVD(A, k)
         end
+        gapA = norm(A - Ak_SVD, 2)
         #println("SVD entered")
     end
     if (missing_param == 1 || (missing_param == 0 && parallel == false))
@@ -57,6 +63,10 @@ function time_gap(A, k, e=nothing, V_initial=nothing; parallel=nothing)
             U, V = low_rank_LSQR(A, k, e, V_initial) 
             Ak_QR =  U*V'
         end
+        # Gap calculation
+        Ak_SVD, trash = low_rank_SVD(A, k)
+        gapSVD = norm(Ak_SVD - Ak_QR, 2)
+        gapA = norm(A - Ak_QR, 2)
         #println("LSQR_seq entered")
     end
     if (missing_param == 0 && parallel == true)
@@ -65,10 +75,15 @@ function time_gap(A, k, e=nothing, V_initial=nothing; parallel=nothing)
             U, V = low_rank_LSQR_parallellized(A, k, e, V_initial, nt) 
             Ak_QR =  U*V'
         end
+        # Gap calculation
+        Ak_SVD, trash = low_rank_SVD(A, k)
+        gapSVD = norm(Ak_SVD - Ak_QR, 2)
+        gapA = norm(A - Ak_QR, 2)
         #println("LSQR_parallel_new entered")
     end
 
-    return t
+    return t, gapSVD, gapA
+
 end
 
 # A = [61 22 14 67 23;
