@@ -12,29 +12,29 @@ include("../main/low_rank_SVD.jl")
 # julia -e 'include("plot_all.jl"); plot_all()'
 
 function plot_all()
-    global m = 90
+    global m = 50
     global n = 50
 
-    k = 30 # fixed
-    e = 0.1 # fixed
+    k = 25 # fixed
+    e = 0.01 # fixed
     Svd_time = []
     LSQR_seq = []
     LSQR_par = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
-    for _ in 1:4
+    for _ in 1:10
         A = rand(m, n)
-        V_initial = rand(k, n)
-        t,_= time_gap(copy(A), k)
+        V_initial = rand(n, k)
+        t= time_gap(copy(A), k)
         push!(Svd_time, Dict(:dim => (m, n), :time => t))
-        #print("SVD done\n")
-        # t,_= time_gap(copy(A), k, e, copy(V_initial), parallel=false)
-        # push!(LSQR_seq, Dict(:dim => (m, n), :time => t))
-        #print("LSQR_seq done\n")
-        #t,_= time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        #push!(LSQR_par, Dict(:dim => (m, n), :time => t))
-        #print("LSQR_par done\n")
-        global m += 5
-        global n += 5
+        print("SVD done\n")
+        t= time_gap(copy(A), k, e, copy(V_initial), parallel=false)
+        push!(LSQR_seq, Dict(:dim => (m, n), :time => t))
+        print("LSQR_seq done\n")
+        t= time_gap(copy(A), k, e, copy(V_initial), parallel=true)
+        push!(LSQR_par, Dict(:dim => (m, n), :time => t))
+        print("LSQR_par done\n")
+        global m += 10
+        global n += 10
     end
 
     # print(Svd_time)
