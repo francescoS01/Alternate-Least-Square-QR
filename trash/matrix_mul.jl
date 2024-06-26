@@ -1,3 +1,8 @@
+"""
+parallel version of matrix multiplication
+
+"""
+
 function parallel_mul(A, B)
     m, kA = size(A)
     kB, n = size(B)
@@ -20,3 +25,11 @@ function parallel_mul(A, B)
     end
     return C
 end
+
+# Example usage
+# A = rand(1500, 1500)
+# B = rand(1500, 1500)
+# @time C = parallel_mul(A, B)
+# @time C = A * B
+
+

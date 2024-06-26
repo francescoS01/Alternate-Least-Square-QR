@@ -105,4 +105,3 @@ end
 
 # t = time_gapV2(copy(A), k)
 # println("Final time: ", t)
-
