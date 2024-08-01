@@ -1,3 +1,4 @@
+using Printf
 function print_matrix(A)
     """
     Input: A (matrix) and precision (number of decimal places)

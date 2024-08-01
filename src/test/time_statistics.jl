@@ -9,6 +9,7 @@ include("../main/utils/time_gap.jl")
 include("../main/low_rank_SVD.jl")
 # julia -e 'include("plot_all.jl"); plot_all()'
 
+#--------------------------------------------------------------------------------------------------------------------------
 
 # the time execution varyng the dimentions of the matrix A
 function time_A_var()
@@ -37,6 +38,68 @@ function time_A_var()
     end
     return Svd_time, LSQR_seq, LSQR_par
 end
+
+function time_A_var_Hilbert_poorly_conditioned()
+    global m = 50
+    global n = 50
+    k = 25 # fixed
+    e = 0.1 # fixed
+    Svd_time = []
+    LSQR_seq = []
+    LSQR_par = []
+    # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
+    for _ in 1:5
+        
+        # Hilbert poorly conditioned square matrix
+        A = [1/(i+j-1) for i in 1:n, j in 1:m]
+        
+        V_initial = rand(n, k)
+        t,_,_= time_gap(copy(A), k)
+        push!(Svd_time, Dict(:dim => (m, n), :time => t))
+        #print("SVD done\n")
+        t,_,_= time_gap(copy(A), k, e, copy(V_initial), parallel=false)
+        push!(LSQR_seq, Dict(:dim => (m, n), :time => t))
+        #print("LSQR_seq done\n")
+        t,_,_= time_gap(copy(A), k, e, copy(V_initial), parallel=true)
+        push!(LSQR_par, Dict(:dim => (m, n), :time => t))
+        #print("LSQR_par done\n")
+        global m += 10
+        global n += 10
+    end
+    return Svd_time, LSQR_seq, LSQR_par
+end
+
+function time_A_var_Vandermonde_poorly_conditioned()
+    global m = 50
+    global n = 50
+    k = 25 # fixed
+    e = 0.1 # fixed
+    Svd_time = []
+    LSQR_seq = []
+    LSQR_par = []
+    # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
+    for _ in 1:5
+        
+        #Vandermonde matrix
+        A = [i^(j-1) for i in 1:n, j in 1:m]
+        
+        V_initial = rand(n, k)
+        t,_,_= time_gap(copy(A), k)
+        push!(Svd_time, Dict(:dim => (m, n), :time => t))
+        #print("SVD done\n")
+        t,_,_= time_gap(copy(A), k, e, copy(V_initial), parallel=false)
+        push!(LSQR_seq, Dict(:dim => (m, n), :time => t))
+        #print("LSQR_seq done\n")
+        t,_,_= time_gap(copy(A), k, e, copy(V_initial), parallel=true)
+        push!(LSQR_par, Dict(:dim => (m, n), :time => t))
+        #print("LSQR_par done\n")
+        global m += 10
+        global n += 10
+    end
+    return Svd_time, LSQR_seq, LSQR_par
+end
+
+#--------------------------------------------------------------------------------------------------------------------------
 
 
 # the time execution varyng k
