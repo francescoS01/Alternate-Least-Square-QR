@@ -18,13 +18,13 @@ function low_rank_LSQR(A, k, e, V_iterative)
 	dif_UV = Inf
 
 	#n_iter = 0 # per contare il numero di iterazioni
-	
+	cycle = 0
 	while dif_UV > e #dif_err > e
 		#n_iter += 1 # per contare il numero di iterazioni
-
+		cycle += 1
 		UV_old = U_iterative * V_iterative'
 		
-		# CASO 1. fiso V e cerco U, m sotto problemi (col di U' e A')
+		# CASO 1. fisso V e cerco U, m sotto problemi (col di U' e A')
 		Q, R = qr_fact(copy(V_iterative))
     	v_r, v_c = size(V_iterative)
 		for i in 1:m
@@ -32,7 +32,7 @@ function low_rank_LSQR(A, k, e, V_iterative)
 			U_iterative'[:, i] = LS_QR(copy(Q), copy(R), v_r, v_c, copy(a_col))
 		end
 	
-		# CASO 2. fiso U e cerco V, n sotto problemi 
+		# CASO 2. fisso U e cerco V, n sotto problemi 
 		Q, R = qr_fact(copy(U_iterative))
 		u_r, u_c = size(U_iterative)
 		for s in 1:n
@@ -49,7 +49,7 @@ function low_rank_LSQR(A, k, e, V_iterative)
 		# nuovo errore --> Loss = differenza tra A e U*V' attuale
 		err = sqrt(sum(abs2, (A - U_iterative * V_iterative')))
 	end	
-
+	print("Cicli totali: ", cycle, "\n")
 	# print("Iterazioni totali: ", n_iter, "\n") # per contare il numero di iterazioni
 	return U_iterative,	V_iterative
 
@@ -72,8 +72,11 @@ function low_rank_LSQR_parallellized(A, k, e, V_iterative, nt)
 	m_sub = ceil(Int, m/nt)
 	n_sub = ceil(Int, n/nt)
 
+	cycle = 0
 	while dif_UV > e
 		UV_old = U_iterative * V_iterative'
+		
+		cycle += 1
 
 		# CASO 1. fiso V e cerco U, m sotto problemi 
 		Q, R = qr_fact(copy(V_iterative))
@@ -105,7 +108,7 @@ function low_rank_LSQR_parallellized(A, k, e, V_iterative, nt)
 		#dif_err = err - sqrt(sum(abs2, (A - U_iterative * V_iterative')))
 		#err = sqrt(sum(abs2, (A - U_iterative * V_iterative')))
 	end	
-
+	print("Cicli totali: ", cycle, "\n")
 	return U_iterative,	V_iterative
 end
 
@@ -131,3 +134,4 @@ function V_sub(A_sub, Q_U, R_U, u_r, u_c, k)
 	end
 	return V_iterative'
 end
+

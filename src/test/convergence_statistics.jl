@@ -16,7 +16,7 @@ function gap_A_var()
     global m = 50  # variable
     global n = 50  # variable
     k = 10 
-    e = 0.001
+    e = 1e-12
     LSQR_SVD = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
     for _ in 1:11
@@ -34,7 +34,7 @@ function gap_A_var_Hilbert_poorly_conditioned()
     global m = 50  # variable
     global n = 50  # variable
     k = 10 
-    e = 0.001
+    e = 1e-12
     LSQR_SVD = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
     for _ in 1:11
@@ -56,7 +56,7 @@ function gap_A_var_Vandermonde_poorly_conditioned()
     global m = 50  # variable
     global n = 50  # variable
     k = 10 
-    e = 0.001
+    e = 1e-12
     LSQR_SVD = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
     for _ in 1:11
@@ -75,7 +75,7 @@ function gap_A_var_square()
     global m = 50  # variable
     global n = 50  # variable
     k = 10 
-    e = 0.001
+    e = 1e-12
     LSQR_SVD = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
     for _ in 1:5
@@ -90,9 +90,9 @@ function gap_A_var_square()
 end
 
 function gap_A_var_thin() # m>n
-    sizes = [(125,20), (270,30), (338,50), (578,50), (630,70)]
+    sizes = [(50,10), (90,30), (130,50), (170,70), (210,90)]
     k = 10 
-    e = 0.001
+    e = 1e-12
     LSQR_SVD = []
     
     for i in 1:5
@@ -108,10 +108,9 @@ end
 
 
 function gap_A_var_fat() # m<n
-    
-    sizes = [(20,125), (30,270), (50,338), (50,578), (70,630)]
+    sizes = [(10,50), (30,90), (50,130), (70,170), (90,210)]
     k = 10 
-    e = 0.001
+    e = 1e-12
     LSQR_SVD = []
     
     for i in 1:5
@@ -129,11 +128,11 @@ function gap_A_var_dense_sparse()
     global m = 50  # variable
     global n = 50  # variable
     k = 10 
-    e = 0.001
+    e = 1e-12
     Dense = []
     Sparse = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
-    for _ in 1:5
+    for _ in 1:10
         A = rand(m, n)
         V_initial = rand(n, k)
         _, gapSVD, _ = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
@@ -143,9 +142,11 @@ function gap_A_var_dense_sparse()
         random_sparse_matrix = Matrix(random_sparse_matrix)
         _, gapSVD, _ = time_gap(copy(random_sparse_matrix), k, e, copy(V_initial), parallel=true)
         push!(Sparse, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        
+        print("Fatte tutte quelle di dimensione ", m, "*", n, "\n")
 
-        global m += 40
-        global n += 40
+        global m += 20
+        global n += 20
     end
     return Dense, Sparse
 end
@@ -154,12 +155,13 @@ function gap_A_var_orth_diag_lower()
     global m = 50  # variable
     global n = 50  # variable
     k = 10 
-    e = 0.001
+    e = 1e-12
+    #e = 0.1
     Orthogonal = []
     Diagonal_out = []
     Lower_tr = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
-    for _ in 1:5
+    for _ in 1:10
         A = rand(m, n)
         V_initial = rand(n, k)
 
@@ -177,8 +179,8 @@ function gap_A_var_orth_diag_lower()
         _, gapSVD, _ = time_gap(copy(random_lower_triangular_matrix), k, e, copy(V_initial), parallel=true)
         push!(Lower_tr, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
 
-        global m += 40
-        global n += 40
+        global m += 20
+        global n += 20
     end
     return Orthogonal, Diagonal_out, Lower_tr
 end
@@ -193,13 +195,13 @@ function gap_k_var()
     m = 50
     n = 50
     global k = 10  # variable
-    A = rand(m, n)
-    e = 0.01 # da vedere
+    e = 1e-12
     Svd_A = []
     LSQR_A = []
     LSQR_SVD = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
-    for _ in 1:10
+    A = rand(m, n)
+    for _ in 1:9
         V_initial = rand(n, k)
         # Chiamo SVD e fa gap con A
         _, gapSVD, gapA = time_gap(copy(A), k)
@@ -227,17 +229,48 @@ function gap_e_var()
     n = 60
     k = 10 
     A = rand(m, n)
-    global e = round(0.0001, digits=4)  # variable
+    global e = 1e-7
     Svd_A = []
     LSQR_A = []
     LSQR_SVD = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
+    V_initial = rand(n, k)
     for _ in 1:8
-        V_initial = rand(n, k)
         _, gapSVD, gapA = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
         push!(LSQR_SVD, Dict(:e => e, :frobenius_norm => gapSVD))
-        global e = e*5
-        global e = round(e, digits=4)
+        global e *= 0.1
     end
     return LSQR_SVD
+end
+
+
+function find_e()
+    m = 50
+    n = 50
+    k = 10 
+    A = rand(m, n)
+    global e = 1e-11
+    gapSVD = Inf
+    # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
+    while (gapSVD>1e-16)
+        print("Provo e: ", e)
+        print("\n")
+        V_initial = rand(n, k)
+        t = @elapsed begin
+            _, gapSVD, _ = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
+        end
+
+        print("Ci ho messo: ", t)
+        print("\n")
+        print("Errore attuale: ", gapSVD)
+        print("\n")
+        print("\n")
+        global e *= 0.1
+        # global e = round(e, digits=4)
+    end
+    print("gapSVD finale : ", gapSVD)
+    print("\n")
+    print("e finale : ", e)
+    print("\n")
+    return
 end
