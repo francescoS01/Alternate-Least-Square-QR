@@ -68,25 +68,43 @@ end
 
 
 # Funzione per la fattorizzazione QR
+# function qr_fact(A)
+#     m, n = size(A)
+#     R = copy(A)  # Fai una copia di A in modo che non venga modificata
+#     Q = Matrix{Float64}(I, m, m)  # Inizializza Q come una matrice identità
+
+#     for i = 1:min(m, n)
+#         # Estrai il vettore Householder per la colonna i-esima
+#         u = householder(R[i:m, i])
+        
+#         # Applica la trasformazione di Householder a R
+#         R[i:m, :] -= 2 * u * (u' * R[i:m, :])
+        
+#         # Applica la trasformazione di Householder a Q
+#         Q[:, i:m] -= 2 * (Q[:, i:m] * u) * u'
+#     end
+
+#     return Q, R
+# end
+
 function qr_fact(A)
     m, n = size(A)
-    R = copy(A)  # Fai una copia di A in modo che non venga modificata
-    Q = Matrix{Float64}(I, m, m)  # Inizializza Q come una matrice identità
+    R = copy(A)  # Copia di A
+    householder_vectors = []  # Vettori di Householder da usare per calcolare Q
 
-    for i = 1:min(m, n)
+    for i = 1:n
         # Estrai il vettore Householder per la colonna i-esima
         u = householder(R[i:m, i])
         
+        # Salva il riflettore di Householder
+        push!(householder_vectors, u)
+        
         # Applica la trasformazione di Householder a R
         R[i:m, :] -= 2 * u * (u' * R[i:m, :])
-        
-        # Applica la trasformazione di Householder a Q
-        Q[:, i:m] -= 2 * (Q[:, i:m] * u) * u'
     end
 
-    return Q, R
+    return householder_vectors, R
 end
-
 
 
 
