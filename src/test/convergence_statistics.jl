@@ -23,7 +23,7 @@ function gap_A_var()
         A = rand(m, n)
         V_initial = rand(n, k)
         _, gapSVD, _ = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        push!(LSQR_SVD, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(LSQR_SVD, Dict(:dim => (m, n), :relative_error => gapSVD))
         global m += 10
         global n += 10
     end
@@ -45,7 +45,7 @@ function gap_A_var_Hilbert_poorly_conditioned()
         print("\n")
         V_initial = rand(n, k)
         _, gapSVD, _ = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        push!(LSQR_SVD, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(LSQR_SVD, Dict(:dim => (m, n), :relative_error => gapSVD))
         global m += 10
         global n += 10
     end
@@ -64,7 +64,7 @@ function gap_A_var_Vandermonde_poorly_conditioned()
         A = [i^(j-1) for i in 1:n, j in 1:m]
         V_initial = rand(n, k)
         _, gapSVD, _ = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        push!(LSQR_SVD, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(LSQR_SVD, Dict(:dim => (m, n), :relative_error => gapSVD))
         global m += 10
         global n += 10
     end
@@ -82,7 +82,7 @@ function gap_A_var_square()
         A = rand(m, n)
         V_initial = rand(n, k)
         _, gapSVD, _ = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        push!(LSQR_SVD, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(LSQR_SVD, Dict(:dim => (m, n), :relative_error => gapSVD))
         global m += 40
         global n += 40
     end
@@ -100,7 +100,7 @@ function gap_A_var_thin() # m>n
         A = rand(m, n)
         V_initial = rand(n, k)
         _, gapSVD, _ = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        push!(LSQR_SVD, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(LSQR_SVD, Dict(:dim => (m, n), :relative_error => gapSVD))
     end
     return LSQR_SVD
 end
@@ -118,7 +118,7 @@ function gap_A_var_fat() # m<n
         A = rand(m, n)
         V_initial = rand(n, k)
         _, gapSVD, _ = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        push!(LSQR_SVD, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(LSQR_SVD, Dict(:dim => (m, n), :relative_error => gapSVD))
     end
     return LSQR_SVD
 end
@@ -136,12 +136,12 @@ function gap_A_var_dense_sparse()
         A = rand(m, n)
         V_initial = rand(n, k)
         _, gapSVD, _ = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        push!(Dense, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(Dense, Dict(:dim => (m, n), :relative_error => gapSVD))
 
         random_sparse_matrix = sprand(m, n, 0.2)
         random_sparse_matrix = Matrix(random_sparse_matrix)
         _, gapSVD, _ = time_gap(copy(random_sparse_matrix), k, e, copy(V_initial), parallel=true)
-        push!(Sparse, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(Sparse, Dict(:dim => (m, n), :relative_error => gapSVD))
         
         print("Fatte tutte quelle di dimensione ", m, "*", n, "\n")
 
@@ -168,16 +168,16 @@ function gap_A_var_orth_diag_lower()
         Q, _ = qr(copy(A))
         Q = Matrix(Q)
         _, gapSVD, _ = time_gap(copy(Q), k, e, copy(V_initial), parallel=true)
-        push!(Orthogonal, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(Orthogonal, Dict(:dim => (m, n), :relative_error => gapSVD))
 
 
         random_diagonal_matrix = Diagonal(randn(n))        
         _, gapSVD, _ = time_gap(copy(random_diagonal_matrix), k, e, copy(V_initial), parallel=true)
-        push!(Diagonal_out, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(Diagonal_out, Dict(:dim => (m, n), :relative_error => gapSVD))
 
         random_lower_triangular_matrix = LowerTriangular(rand(m, m))
         _, gapSVD, _ = time_gap(copy(random_lower_triangular_matrix), k, e, copy(V_initial), parallel=true)
-        push!(Lower_tr, Dict(:dim => (m, n), :frobenius_norm => gapSVD))
+        push!(Lower_tr, Dict(:dim => (m, n), :relative_error => gapSVD))
 
         global m += 20
         global n += 20
@@ -205,15 +205,15 @@ function gap_k_var()
         V_initial = rand(n, k)
         # Chiamo SVD e fa gap con A
         _, gapSVD, gapA = time_gap(copy(A), k)
-        push!(Svd_A, Dict(:k => k, :frobenius_norm => gapA))
+        push!(Svd_A, Dict(:k => k, :relative_error => gapA))
         #print("SVD done\n")
         # _, gapSVD, gapA = time_gap(copy(A), k, e, copy(V_initial), parallel=false)
         # push!(LSQR_seq, Dict(:dim => (m, n), :time => t))
         #print("LSQR_seq done\n")
         # Chiamo metodo parallelo e fa gapA e gapSVD
         _, gapSVD, gapA = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        push!(LSQR_A, Dict(:k => k, :frobenius_norm => gapA))
-        push!(LSQR_SVD, Dict(:k => k, :frobenius_norm => gapSVD))
+        push!(LSQR_A, Dict(:k => k, :relative_error => gapA))
+        push!(LSQR_SVD, Dict(:k => k, :relative_error => gapSVD))
         #print("LSQR_par done\n")
         global k += 5
     end
@@ -221,23 +221,54 @@ function gap_k_var()
     return Svd_A, LSQR_A, LSQR_SVD
 end
 
+function gap_k2_var()
+    m = 50
+    n = 50
+    global k = 10  # variable
+    e = 7
+    Svd_A = []
+    LSQR_A = []
+    LSQR_SVD = []
+    # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
+    A = rand(m, n)
+    for _ in 1:9
+        V_initial = rand(n, k)
+        # Chiamo SVD e fa gap con A
+        _, gapSVD, gapA = time_gap(copy(A), k)
+        push!(Svd_A, Dict(:k => k, :relative_error => gapA))
+        #print("SVD done\n")
+        # _, gapSVD, gapA = time_gap(copy(A), k, e, copy(V_initial), parallel=false)
+        # push!(LSQR_seq, Dict(:dim => (m, n), :time => t))
+        #print("LSQR_seq done\n")
+        # Chiamo metodo parallelo e fa gapA e gapSVD
+        _, gapSVD, gapA = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
+        push!(LSQR_A, Dict(:k => k, :relative_error => gapA))
+        push!(LSQR_SVD, Dict(:k => k, :relative_error => gapSVD))
+        #print("LSQR_par done\n")
+        global k += 5
+    end
+    
+    return Svd_A, LSQR_A, LSQR_SVD
+end
 
 # the gap between different algorithms solution and even with A matrix varyng the rank k
 # OSS! deicdere se mettere la differenza rea A e il nostro metodo 
 function gap_e_var()
-    m = 60
-    n = 60
+    m = 50
+    n = 50
     k = 10 
     A = rand(m, n)
-    global e = 1e-7
+    #global e = 1e-7
+    global e = 1e-14
     Svd_A = []
     LSQR_A = []
     LSQR_SVD = []
     # Plot the execution times as the matrix sizes of the 3 methods vary in time_gap
     V_initial = rand(n, k)
-    for _ in 1:8
+    #for _ in 1:7
+    for _ in 1:2
         _, gapSVD, gapA = time_gap(copy(A), k, e, copy(V_initial), parallel=true)
-        push!(LSQR_SVD, Dict(:e => e, :frobenius_norm => gapSVD))
+        push!(LSQR_SVD, Dict(:e => e, :relative_error => gapSVD))
         global e *= 0.1
     end
     return LSQR_SVD

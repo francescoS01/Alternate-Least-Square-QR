@@ -3,45 +3,6 @@ include("../low_rank_SVD.jl")
 include("print_matrix.jl")
 
 
-# function time_gap(A, k, e=nothing, V_initial=nothing; parallel=true)
-
-#     Ak_SVD=[]
-#     Ak_QR=[]
-
-#     if (e===nothing && V_initial===nothing)
-#         t = @elapsed begin
-#             Ak_SVD, trash = low_rank_SVD(A, k)
-#         end
-#     else
-#         if (parallel===true)
-#             nt=Threads.nthreads()
-#             t = @elapsed begin
-#                 U, V = LS_QR_alternate_parallellized(A, k, e, V_initial, nt) 
-#                 Ak_QR =  U*V'
-#             end
-#             #print("LSQR_parallel_new entered\n")
-#         else
-#             t = @elapsed begin
-#                 U, V = LS_QR_alternate(A, k, e, V_initial) 
-#                 Ak_QR =  U*V'
-#             end
-#             #print("LSQR_seq entered\n")
-#         end
-#     end
-
-#     gap = 0
-#     if (Ak_SVD != [] && Ak_QR != [])
-#         gap = norm(Ak_SVD - Ak_QR, 2)
-#     elseif (Ak_SVD == [] && Ak_QR != [])
-#         Ak_SVD, _ = low_rank(A, k)
-#         gap = norm(Ak_SVD - Ak_QR, 2)
-#     end
-#     # If Ak_SVD == [] && Ak_QR == [] t=0 o t=svd_time, gap always 0 because it is useless to calculate a gap with svd
-
-#     return t, gap
-# end
-
-
 
 # A questa funzione vengono passate A, k, e, V_initial. La funzione resituisce il gap tra il metodo e SVD, 
 # il gap tra il nostro metodo e A e il tempo di esecuzione del metodo  
@@ -60,7 +21,7 @@ function time_gap(A, k, e=nothing, V_initial=nothing; parallel=nothing)
         t = @elapsed begin
             Ak_SVD, trash = low_rank_SVD(A, k)
         end
-        gapA = norm(A - Ak_SVD, 2)
+        gapA = norm(A - Ak_SVD, 2) / norm(A, 2)
         #println("SVD entered")
     end
 
@@ -72,8 +33,8 @@ function time_gap(A, k, e=nothing, V_initial=nothing; parallel=nothing)
         end
         # Gap calculation
         Ak_SVD, trash = low_rank_SVD(A, k)
-        gapSVD = norm(Ak_SVD - Ak_QR, 2)
-        gapA = norm(A - Ak_QR, 2)
+        gapSVD = norm(Ak_SVD - Ak_QR, 2) / norm(Ak_SVD, 2)
+        gapA = norm(A - Ak_QR, 2) / norm(A, 2)
         #println("LSQR_seq entered")
     end
 
@@ -86,8 +47,8 @@ function time_gap(A, k, e=nothing, V_initial=nothing; parallel=nothing)
         end
         # Gap calculation
         Ak_SVD, trash = low_rank_SVD(A, k)
-        gapSVD = norm(Ak_SVD - Ak_QR, 2)
-        gapA = norm(A - Ak_QR, 2)
+        gapSVD = norm(Ak_SVD - Ak_QR, 2) / norm(Ak_SVD, 2)
+        gapA = norm(A - Ak_QR, 2) / norm(A, 2)
         #println("LSQR_parallel_new entered")
     end
 
