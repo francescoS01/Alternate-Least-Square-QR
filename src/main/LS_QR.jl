@@ -15,19 +15,30 @@ y dim = m x 1
 
 
 function LS_QR(householder_vectors, R, m, n, y)
-    # Applicare i riflettori di Householder su y
-    for k = 1:n  # Applica i riflettori in ordine
-        u = householder_vectors[k]  # Riflettore di Householder
-        # println("Dimensions of u: ", length(u))
-        # println("Dimensions of y: ", length(y))
-        # La porzione di y sulla quale il riflettore u agisce
-        sub_y = y[k:m]  # Porzione di y corrispondente al riflettore
+    """
+    Solves `Rx = Qᵀy` using Householder reflections without explicitly forming `Q`.
 
-        # Applicazione del riflettore a sub_y: sub_y = sub_y - 2 * (u' * sub_y) * u
-        y[k:m] -= 2 * (u' * sub_y) * u  # Applica il riflettore alla porzione corretta di y
+    # Arguments
+    - `householder_vectors`: Householder vectors from QR factorization.
+    - `R`: Upper triangular `n × n` matrix.
+    - `m, n`: Dimensions of the original matrix.
+    - `y`: Right-hand side vector.
+
+    # Method
+    Applies Householder reflectors iteratively to compute `Qᵀy`, then solves the triangular system `Rx = Qᵀy`.
+
+    # Returns
+    - `x`: Solution vector.
+    """
+
+    for k = 1:n  
+        u = householder_vectors[k]  
+        # take the subvector of y from k to m where the householder vector is applied
+        sub_y = y[k:m] 
+        y[k:m] -= 2 * (u' * sub_y) * u  
     end
 
-    # Ora risolvi Rx = Q^T * y (y è ora Q^T * y)
-    x = R \ y  # Risoluzione del sistema triangolare
+    # Now solve Rx = Q^T * y (y is now Q^T * y)
+    x = R \ y  
     return x
 end

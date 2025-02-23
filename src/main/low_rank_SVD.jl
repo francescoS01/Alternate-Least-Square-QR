@@ -27,10 +27,15 @@ function low_rank_SVD(A, k)
 
 end
 
+
+
 function low_rank_time(A, k)
 	"""	
 	Input: A (matrix) and precision k (rango)
-	Output: the matrix A' (approximation of A) with the specified precision
+	
+	Output:
+	- the matrix A' (approximation of A) with the specified precision
+	- time for the SVD
 	"""
 
 	t = @elapsed begin

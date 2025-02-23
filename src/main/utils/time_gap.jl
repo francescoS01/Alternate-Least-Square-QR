@@ -4,8 +4,8 @@ include("print_matrix.jl")
 
 
 
-# A questa funzione vengono passate A, k, e, V_initial. La funzione resituisce il gap tra il metodo e SVD, 
-# il gap tra il nostro metodo e A e il tempo di esecuzione del metodo  
+# This function is passed A, k, e, V_initial. The function returns the gap between the method and SVD, 
+# the gap between our method and A, and the execution time of the method
 function time_gap(A, k, e=nothing, V_initial=nothing; parallel=nothing)
 
     missing_param = (isnothing(e)) + (isnothing(V_initial)) + (isnothing(parallel))

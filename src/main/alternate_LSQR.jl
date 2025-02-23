@@ -7,27 +7,27 @@ using Random
 using Printf
 
 
+
+
+# ------- SEQUENTIAL VERSION  -------
+
 function low_rank_LSQR(A, k, e, V_iterative)
 	
 	m, n = size(A) 
 
-	#V_iterative = V_initial'
 	U_iterative = rand(m, k)
-	err = norm(A - U_iterative * V_iterative')
-	dif_err = Inf
 	dif_UV = Inf
 
-	#n_iter = 0 # per contare il numero di iterazioni
 	cycle = 0
-	while dif_UV > e #dif_err > e
-		#n_iter += 1 # per contare il numero di iterazioni
+	while dif_UV > e 
+
 		cycle += 1
 		if cycle > 200
 			break
 		end
 		UV_old = U_iterative * V_iterative'
 		
-		# CASO 1. fisso V e cerco U, m sotto problemi (col di U' e A')
+		# CASE 1. fix V and find U, m subproblems (columns of U' and A')
 		householder_vectors, R = qr_fact(V_iterative)
     	v_r, v_c = size(V_iterative)
 		for i in 1:m
@@ -35,7 +35,7 @@ function low_rank_LSQR(A, k, e, V_iterative)
 			U_iterative'[:, i] = LS_QR(householder_vectors, R, v_r, v_c, a_col)
 		end
 	
-		# CASO 2. fisso U e cerco V, n sotto problemi 
+		# CASE 2. fix U and find V, n subproblems
 		householder_vectors, R = qr_fact(U_iterative)
 		u_r, u_c = size(U_iterative)
 		for s in 1:n
@@ -43,19 +43,11 @@ function low_rank_LSQR(A, k, e, V_iterative)
 			V_iterative'[:, s] = LS_QR(householder_vectors, R, u_r, u_c, a_col)
 		end
 		
-		# Differenza tra UV_old e UV_new (norma frobenius) tra due iterazioni
+		# Difference between UV_old and UV_new (Frobenius norm) between two iterations
 		dif_UV = norm(UV_old - U_iterative * V_iterative', 2)
-			
-		# variazione errore rispetto a iterazione precedente (norma frobenius) rispetto ad A
-		dif_err = err - sqrt(sum(abs2, (A - U_iterative * V_iterative')))
-
-		# nuovo errore --> Loss = differenza tra A e U*V' attuale
-		err = sqrt(sum(abs2, (A - U_iterative * V_iterative')))
 	end	
-	print("Cicli totali: ", cycle, "\n")
-	# print("Iterazioni totali: ", n_iter, "\n") # per contare il numero di iterazioni
-	return U_iterative,	V_iterative
 
+	return U_iterative,	V_iterative
 end
 
 
@@ -66,10 +58,7 @@ function low_rank_LSQR_parallellized(A, k, e, V_iterative, nt)
 	
 	m, n = size(A)
 
-	#V_iterative = V_initial' # sistemare questione delle dimensioni 
 	U_iterative = rand(m, k)
-	err = norm(A - U_iterative * V_iterative')
-	dif_err = Inf
 	dif_UV = Inf
 	
 	m_sub = ceil(Int, m/nt)
@@ -84,7 +73,7 @@ function low_rank_LSQR_parallellized(A, k, e, V_iterative, nt)
 			break
 		end
 
-		# CASO 1. fiso V e cerco U, m sotto problemi 
+		# CASE 1. fix V and find U, m subproblems
 		householder_vectors, R = qr_fact(V_iterative)
     	v_r, v_c = size(V_iterative)
 		Threads.@threads for i in 0:nt-1
@@ -97,7 +86,7 @@ function low_rank_LSQR_parallellized(A, k, e, V_iterative, nt)
 			end
 		end
 
-		# CASO 2. fiso U e cerco V, n sotto problemi 
+		# CASE 2. fix U and find V, n subproblems
 		householder_vectors, R = qr_fact(U_iterative)
 		u_r, u_c = size(U_iterative)
 		Threads.@threads for i in 0:nt-1
@@ -111,10 +100,8 @@ function low_rank_LSQR_parallellized(A, k, e, V_iterative, nt)
 		end
 
 		dif_UV = norm(UV_old - U_iterative * V_iterative', 2)
-		#dif_err = err - sqrt(sum(abs2, (A - U_iterative * V_iterative')))
-		#err = sqrt(sum(abs2, (A - U_iterative * V_iterative')))
 	end	
-	print("Cicli totali: ", cycle, "\n")
+
 	return U_iterative,	V_iterative
 end
 
@@ -135,7 +122,6 @@ function V_sub(A_sub, householder_vectors, R_U, u_r, u_c, k)
 	V_iterative = rand(n_sub, k)
 	for i in 1:n_sub
 		a_col = A_sub[:, i]
-		# V_iterative'[:, i] = LS_QR(copy(U), copy(a_col))
 		V_iterative'[:, i] = LS_QR(householder_vectors, R_U, u_r, u_c, a_col)
 	end
 	return V_iterative'

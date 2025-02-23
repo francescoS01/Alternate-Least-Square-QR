@@ -11,19 +11,28 @@ function householder(x)
     """
     s = norm(x)
     if s == 0
-        return x  # Se la norma è zero, torna il vettore originale
+        return x 
     end
     if x[1] >= 0
-        s = -s  # Per stabilità numerica
+        s = -s  # for numerical stability
     end
-    v = copy(x)  # Copia per evitare di modificare il vettore originale
-    v[1] -= s  # Modifica il primo elemento
-    u = v / norm(v)  # Normalizza il vettore
+    v = copy(x) 
+    v[1] -= s  # modify only the first element 
+    u = v / norm(v)  # Normalization 
     return u
 end
 
 
 function qr_fact(A)
+    """
+    # Arguments
+    - `A::AbstractMatrix`: The input matrix to be factorized.
+
+    # Returns
+    - `householder_vectors::Vector`: A vector containing the Householder vectors used to compute `Q`.
+    - `R::AbstractMatrix`: The upper triangular matrix `R` from the QR factorization.
+
+    """
     m, n = size(A)
     R = copy(A)  # Copia di A
     householder_vectors = []  # Vettori di Householder da usare per calcolare Q
